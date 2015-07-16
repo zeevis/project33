@@ -127,7 +127,7 @@ public class AddOrEditUserFragment extends Fragment {
                                 editor.commit();
 
                                 final ParseObject actions = new ParseObject("TasksList");
-//////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
                                 actions.put("worker", ParseObject.createWithoutData(ParseUser.class, user.getObjectId()));
                                 actions.add("tasks",actionEt.getText().toString());
                                 actions.put("workPlace", new ParseGeoPoint(lat, lng));
