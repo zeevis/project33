@@ -18,6 +18,7 @@ import android.widget.ListView;
 
 import com.parse.FindCallback;
 import com.parse.GetCallback;
+import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -103,7 +104,7 @@ public class WorkerFragment extends Fragment {
 
         usersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(final AdapterView<?> parent, View view, final int position, long id) {
 
 
                 ParseQuery<ParseUser> query = ParseUser.getQuery();
@@ -120,8 +121,85 @@ public class WorkerFragment extends Fragment {
 
 
 
+                            ParseQuery<ParseObject> query = new ParseQuery<ParseObject>(
+                                    "TasksList");
+                            query.include("worker");
+                            // Locate the column named "ranknum" in Parse.com and order list
+                            // by ascending
+
+
+                            List<ParseObject> ob = null;
+                            try {
+                                ob = query.find();
+                            } catch (ParseException e1) {
+                                e1.printStackTrace();
+                            }
+
+                             for (ParseObject po : ob) {
+                                 // Locate images in flag column
+
+                                 if (po.getParseObject("worker") != null)
+                                     if( po.getParseObject("worker").getString("username")!=null )
+                                         if( po.getParseObject("worker").getString("username").equals(parent.getItemAtPosition(position).toString()) ) {
+                                           createEditUserDialog(userid, po.getObjectId());
+
+                                 }
+
+                             }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+                                ParseQuery<ParseUser> innerQuery = ParseUser.getQuery();
+                            innerQuery.equalTo("username", userid);
+
+                            ParseQuery query = new ParseQuery("TasksList");
+                            query.whereMatchesQuery("worker", innerQuery);
+                            query.findInBackground(new FindCallback<ParseUser>(){
+
+
+                                @Override
+                                public void done(List<ParseUser> objects, com.parse.ParseException e) {
+                                    // resultList now contains the class A objects which match the class B query.
+                                    createEditUserDialog(userid, objects.get(0).getObjectId());
+                                }
+
+
+                            });
+*/
+
+                            /*
+
                             ParseQuery<ParseObject> query = ParseQuery.getQuery("TaskList");
-                            query.whereEqualTo("worker",user );
+                            query.whereEqualTo("worker",user.getParseUser() );
                             query.findInBackground(new FindCallback<ParseObject>() {
                                 @Override
                                  public void done(List<ParseObject> list, com.parse.ParseException e) {
@@ -134,7 +212,7 @@ public class WorkerFragment extends Fragment {
                                     }
                                 }
                             });
-
+*/
 
 
 
@@ -190,7 +268,7 @@ public class WorkerFragment extends Fragment {
         // if (restoredText != null) {
         String action = prefs.getString("action"+userid, "0");//"No name defined" is the default value.
         float lat = prefs.getFloat("lat" + userid, 0);
-        float lng = prefs.getFloat("lat" + userid, 0);
+        float lng = prefs.getFloat("lng" + userid, 0);
 
 
 
@@ -203,7 +281,7 @@ public class WorkerFragment extends Fragment {
                 .findViewById(R.id.latEditOldUser);
 
         final EditText lngEt = (EditText) promptsView
-                .findViewById(R.id.latEditOldUser);
+                .findViewById(R.id.lngEditOldUser);
 
         actionEt.setText(action);
         latEt.setText(lat+"");
@@ -242,14 +320,14 @@ public class WorkerFragment extends Fragment {
                                     }
                                 });
 
-
+/*
                                 final ParseObject actions = new ParseObject("TasksList");
 
                                 actions.put("worker", ParseObject.createWithoutData(ParseUser.class, userid));
                                 actions.add("tasks", Arrays.asList(actionEt.getText().toString()));
                                 actions.put("workPlace", new ParseGeoPoint(lat, lng));
                                 actions.saveInBackground();
-
+*/
                                 SharedPreferences.Editor editor = getActivity().getSharedPreferences("prefs", Context.MODE_PRIVATE).edit();
                                 editor.putString("action" + userid, actionEt.getText().toString());
                                 editor.putFloat("lat" + userid, lat);

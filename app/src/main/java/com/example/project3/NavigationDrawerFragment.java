@@ -105,7 +105,7 @@ public class NavigationDrawerFragment extends Fragment {
                 getActionBar().getThemedContext(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,(!ParseUser.getCurrentUser().getBoolean("isManager")?new String[]{"info", "action", "logout",}:
-                new String[]{"worker", "bla", "fdfdgdgdg",})
+                new String[]{"worker", "monthly report", "fdfdgdgdg",})
                 ));
 
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);

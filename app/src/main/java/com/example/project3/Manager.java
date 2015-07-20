@@ -21,7 +21,8 @@ import java.util.ArrayList;
 
 
 public class Manager extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks ,WorkerFragment.OnFragmentInteractionListener , AddOrEditUserFragment.OnFragmentInteractionListener {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks ,WorkerFragment.OnFragmentInteractionListener
+        , AddOrEditUserFragment.OnFragmentInteractionListener,MonthlyReportFragment.OnFragmentInteractionListener {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -63,12 +64,12 @@ public class Manager extends ActionBarActivity
                     .replace(R.id.container, wf)
                     .commit();
         }
-       else if (position == 100) {
-            AddOrEditUserFragment aoe = new AddOrEditUserFragment();
+       else if (position == 1) {
+            MonthlyReportFragment mrf = new MonthlyReportFragment();
 
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
-                    .replace(R.id.container, aoe)
+                    .replace(R.id.container,  mrf )
                     .commit();
         }
         else {

@@ -57,6 +57,7 @@ public class UserMainPage extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+    static boolean inOrOut = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -222,6 +223,16 @@ public class UserMainPage extends ActionBarActivity
 
 
 
+                SharedPreferences prefs = getActivity().getSharedPreferences("prefs", MODE_PRIVATE);
+                String str = prefs.getString("ifInside", "0");
+               if(prefs.getBoolean("inOrOut", false)) {
+                   enterExitBtn.setText("Exit");
+                   timeAndDateUserTv.setText(prefs.getString("ifInside", "0"));
+                   timeDataForTodayStr = str;
+
+               }
+
+
 
 
 
@@ -245,6 +256,13 @@ public class UserMainPage extends ActionBarActivity
                 @Override
                 public void onClick(View v) {
 
+/*
+                    if(inOrOut) {
+                        SharedPreferences prefs = getActivity().getSharedPreferences("prefs", MODE_PRIVATE);
+                        String str = prefs.getString("ifInside", "0");
+                        ((Button)v).setText("Exit");
+                        timeAndDateUserTv.setText(str);
+                    }*/
 
                     if(((Button)v).getText().equals("Enter")) {
                         Date date = new Date();
@@ -257,6 +275,13 @@ public class UserMainPage extends ActionBarActivity
                         timeDataForTodayStr= dateFormatted +"    "+timeDateFormatted;
                         timeAndDateUserTv.setText(timeDataForTodayStr);
                         enterExitBtn.setText("Exit");
+
+
+                        SharedPreferences.Editor editor = getActivity().getSharedPreferences("prefs", MODE_PRIVATE).edit();
+                        editor.putString("ifInside", timeDataForTodayStr);
+                        editor.putBoolean("inOrOut", true);
+                        editor.commit();
+                        inOrOut = true;
                         return;
 
 
@@ -276,6 +301,10 @@ public class UserMainPage extends ActionBarActivity
                       //timeAndDateUserTv.setText(timeAndDateUserTv.getText() + " - "+timeDateFormat);
                       enterExitBtn.setText("Enter");
 
+                      SharedPreferences.Editor editor = getActivity().getSharedPreferences("prefs", MODE_PRIVATE).edit();
+                      editor.putBoolean("inOrOut", false);
+                      editor.commit();
+                      inOrOut = false;
 
                     }
                 }
@@ -388,10 +417,18 @@ public class UserMainPage extends ActionBarActivity
                   public void done(com.parse.ParseException e) {
                         //  Access the object id here
                         objectIdToRefresh = dates.getObjectId();
+                        SharedPreferences.Editor editor = getActivity().getSharedPreferences("prefs", MODE_PRIVATE).edit();
+                        editor.putString("objectIdToRefresh", objectIdToRefresh);
+                        editor.commit();
+
+
+
                     }
                 });
             }
             else{
+                SharedPreferences prefs = getActivity().getSharedPreferences("prefs", MODE_PRIVATE);
+                objectIdToRefresh = prefs.getString("objectIdToRefresh", "0");
                 ParseQuery<ParseObject> query = ParseQuery.getQuery("Shift");
 
 // Retrieve the object by id
