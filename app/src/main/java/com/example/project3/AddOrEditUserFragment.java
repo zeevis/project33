@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
+import android.widget.Toast;
 
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
@@ -40,6 +42,7 @@ public class AddOrEditUserFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
     EditText usernameEt,passwordEt,actionEt,emailEdit,latEt,lngEt;
     Button saveBtn;
+    ScrollView sv;
     boolean saveOrUpdate;
    Manager parentActivity;
     /**
@@ -78,7 +81,7 @@ public class AddOrEditUserFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v =  inflater.inflate(R.layout.fragment_add_or_edit_user, container, false);
+        final View v =  inflater.inflate(R.layout.fragment_add_or_edit_user, container, false);
         usernameEt = (EditText)v.findViewById(R.id.usernameEditEt);
         passwordEt = (EditText)v.findViewById(R.id.passwordEditEt);
         actionEt = (EditText)v.findViewById(R.id.actionEditEt);
@@ -89,7 +92,7 @@ public class AddOrEditUserFragment extends Fragment {
 
 
 
-    return  v;
+        return v;
     }
 
     @Override
@@ -104,6 +107,13 @@ public class AddOrEditUserFragment extends Fragment {
 
                 if(!((Manager)getActivity()).saveOrUpdate)
                 {
+                    if(!isValidEmail(emailEdit.getText().toString()))
+                    {
+                        Toast.makeText(getActivity(), "email is invalid", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+
                     final ParseUser user = new ParseUser();
                     user.setUsername(usernameEt.getText().toString());
                     user.setPassword(passwordEt.getText().toString());
@@ -118,8 +128,8 @@ public class AddOrEditUserFragment extends Fragment {
                         public void done(com.parse.ParseException e) {
                             if (e == null) {
                                 Log.i("wowwowowow", "sucsess"); // Hooray! Let them use the app now.
-                                float lat = Float.parseFloat(latEt.getText().toString());
-                                float lng = Float.parseFloat(lngEt.getText().toString());
+                                float lat = latEt.getText().toString().equals("") ?0: Float.parseFloat(latEt.getText().toString());
+                                float lng = lngEt.getText().toString().equals("") ?0:Float.parseFloat(lngEt.getText().toString());
                                 SharedPreferences.Editor editor =getActivity().getSharedPreferences("prefs", Context.MODE_PRIVATE).edit();
                                 editor.putString("action" + user.getObjectId(), actionEt.getText().toString());
                                 editor.putFloat("lat" + user.getObjectId(), lat);
@@ -129,12 +139,12 @@ public class AddOrEditUserFragment extends Fragment {
                                 final ParseObject actions = new ParseObject("TasksList");
 /////////////////////////////////////////////////////////////////////
                                 actions.put("worker", ParseObject.createWithoutData(ParseUser.class, user.getObjectId()));
-                                actions.add("tasks",actionEt.getText().toString());
+                                actions.add("tasks", actionEt.getText().toString());
                                 actions.put("workPlace", new ParseGeoPoint(lat, lng));
                                 actions.saveInBackground();
-
+                                Toast.makeText(getActivity(),"saved",Toast.LENGTH_LONG).show();
                             } else {
-                                Log.i("!!!!!!!!!!!!!!!111", "no good");
+                                Log.i("!!!!!!!!!!!!!!!111", "no good " + e.toString());
                                 // Sign up didn't succeed. Look at the ParseException
                                 // to figure out what went wrong
                             }
@@ -156,6 +166,15 @@ public class AddOrEditUserFragment extends Fragment {
 
     }
 
+    public boolean isValidEmail(CharSequence target) {
+        if (target == null) {
+            {
+                return false;
+            }
+        } else {
+            return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+        }
+    }
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {

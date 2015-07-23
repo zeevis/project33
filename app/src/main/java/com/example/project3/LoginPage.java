@@ -29,12 +29,28 @@ public class LoginPage extends ActionBarActivity {
 
         OpenParse.getOpenPares(this);
 
-        setContentView(R.layout.activity_login_page);
-        username = (EditText)findViewById(R.id.username);
-        password = (EditText)findViewById(R.id.password);
-        logInBusiness = (Button)findViewById(R.id.logInAsBusinessBtn);
+        ParseUser currentUser = ParseUser.getCurrentUser();
+        if (currentUser != null) {
+            // do stuff with the user
+            if (currentUser.getBoolean("isManager")) {
+                Intent intent = new Intent(LoginPage.this, Manager.class);
+                intent.putExtra("userid", currentUser.getObjectId());
+                setResult(RESULT_OK, intent);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(LoginPage.this, UserMainPage.class);
+                intent.putExtra("userid", currentUser.getObjectId());
+                setResult(RESULT_OK, intent);
+                startActivity(intent);
+            }
+        } else {
 
-        //73EWZuGtnf
+            setContentView(R.layout.activity_login_page);
+            username = (EditText) findViewById(R.id.username);
+            password = (EditText) findViewById(R.id.password);
+            logInBusiness = (Button) findViewById(R.id.logInAsBusinessBtn);
+
+            //73EWZuGtnf
 
 
 
@@ -66,46 +82,44 @@ public class LoginPage extends ActionBarActivity {
 */
 
 
+            logInBusiness.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View arg0) {
+                    // TODO Auto-generated method stub
 
 
-        logInBusiness.setOnClickListener(new View.OnClickListener() {
+                    ParseUser.logInInBackground(username.getText().toString(), password.getText().toString(), new LogInCallback() {
+                        @Override
+                        public void done(ParseUser parseUser, com.parse.ParseException e) {
+                            if (parseUser != null) {
+                                if (parseUser.getBoolean("isManager")) {
+                                    Intent intent = new Intent(LoginPage.this, Manager.class);
+                                    intent.putExtra("userid", parseUser.getObjectId());
+                                    setResult(RESULT_OK, intent);
+                                    startActivity(intent);
+                                } else {
+                                    Intent intent = new Intent(LoginPage.this, UserMainPage.class);
+                                    intent.putExtra("userid", parseUser.getObjectId());
+                                    setResult(RESULT_OK, intent);
+                                    startActivity(intent);
+                                }
 
-            @Override
-            public void onClick(View arg0) {
-                // TODO Auto-generated method stub
 
-
-                ParseUser.logInInBackground(username.getText().toString(), password.getText().toString(), new LogInCallback() {
-                    @Override
-                    public void done(ParseUser parseUser, com.parse.ParseException e) {
-                        if (parseUser != null) {
-                            if (parseUser.getBoolean("isManager")) {
-                                Intent intent = new Intent(LoginPage.this, Manager.class);
-                                intent.putExtra("userid", parseUser.getObjectId());
-                                setResult(RESULT_OK, intent);
-                                startActivity(intent);
                             } else {
-                                Intent intent = new Intent(LoginPage.this, UserMainPage.class);
-                                intent.putExtra("userid", parseUser.getObjectId());
-                                setResult(RESULT_OK, intent);
-                                startActivity(intent);
+                                Toast.makeText(LoginPage.this, "your username or password are invalid", Toast.LENGTH_LONG).show();
                             }
-
-
-                        } else {
-                            Toast.makeText(LoginPage.this, "your username or password are invalid", Toast.LENGTH_LONG).show();
                         }
-                    }
 
 
-                });
+                    });
 
 
-            }
-        });
+                }
+            });
+
+        }
+
 
     }
-
-
-
 }

@@ -104,8 +104,8 @@ public class NavigationDrawerFragment extends Fragment {
 
                 getActionBar().getThemedContext(),
                 android.R.layout.simple_list_item_activated_1,
-                android.R.id.text1,(!ParseUser.getCurrentUser().getBoolean("isManager")?new String[]{"info", "action", "logout",}:
-                new String[]{"worker", "monthly report", "fdfdgdgdg",})
+                android.R.id.text1,(!ParseUser.getCurrentUser().getBoolean("isManager")?new String[]{"info", "action","home", "logout",}:
+                new String[]{"worker", "monthly report", "home","logout"})
                 ));
 
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
@@ -253,7 +253,7 @@ public class NavigationDrawerFragment extends Fragment {
         if (item.getItemId() == R.id.add_userItem) {
             ((Manager)getActivity()).saveOrUpdate = false;
             AddOrEditUserFragment aoe = new AddOrEditUserFragment();
-            FragmentManager fragmentManager =getActivity().getSupportFragmentManager();
+            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, aoe)
                     .commit();

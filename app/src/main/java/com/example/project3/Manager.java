@@ -17,12 +17,14 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.parse.ParseUser;
+
 import java.util.ArrayList;
 
 
 public class Manager extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks ,WorkerFragment.OnFragmentInteractionListener
-        , AddOrEditUserFragment.OnFragmentInteractionListener,MonthlyReportFragment.OnFragmentInteractionListener {
+        , AddOrEditUserFragment.OnFragmentInteractionListener,MonthlyReportFragment.OnFragmentInteractionListener,MonthlyFinalReportFragment.OnFragmentInteractionListener {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -35,6 +37,8 @@ public class Manager extends ActionBarActivity
     private CharSequence mTitle;
     String userid;
     boolean saveOrUpdate;
+
+    int test = -100;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +60,7 @@ public class Manager extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
+        test = position;
         if (position == 0) {
             WorkerFragment wf = new WorkerFragment();
 
@@ -72,6 +77,11 @@ public class Manager extends ActionBarActivity
                     .replace(R.id.container,  mrf )
                     .commit();
         }
+        else if (position == 2)
+        {
+            ParseUser.logOut();
+            ParseUser currentUser = ParseUser.getCurrentUser(); // this will now be null
+        }
         else {
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
@@ -80,6 +90,7 @@ public class Manager extends ActionBarActivity
         }
 
     }
+
 
     public void onSectionAttached(int number) {
         switch (number) {
@@ -106,12 +117,30 @@ public class Manager extends ActionBarActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.manager, menu);
-            restoreActionBar();
-            return true;
+
+
+
+            if(test==0){
+
+                // Only show items in the action bar relevant to this screen
+                // if the drawer is not showing. Otherwise, let the drawer
+                // decide what to show in the action bar.
+                getMenuInflater().inflate(R.menu.manager, menu);
+                restoreActionBar();
+                return true;
+
+            }else{
+
+
+                return super.onCreateOptionsMenu(menu);
+            }
+
+//            // Only show items in the action bar relevant to this screen
+//            // if the drawer is not showing. Otherwise, let the drawer
+//            // decide what to show in the action bar.
+//            getMenuInflater().inflate(R.menu.manager, menu);
+//            restoreActionBar();
+//            return true;
         }
         return super.onCreateOptionsMenu(menu);
     }
