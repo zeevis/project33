@@ -27,7 +27,6 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -154,31 +153,6 @@ public class WorkerFragment extends Fragment {
                                  }
 
                              }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -321,7 +295,7 @@ public class WorkerFragment extends Fragment {
                                             // Now let's update it with some new data. In this case, only cheatMode and score
                                             // will get sent to the Parse Cloud. playerName hasn't changed.
                                             actions.put("worker", ParseObject.createWithoutData(ParseUser.class, userid));
-                                            actions.add("tasks", Arrays.asList(actionEt.getText().toString()));
+                                            actions.add("tasks",actionEt.getText().toString());
                                             actions.put("workPlace", new ParseGeoPoint(lat, lng));
                                             actions.saveInBackground();
                                         }

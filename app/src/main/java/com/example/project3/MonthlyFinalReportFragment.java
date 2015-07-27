@@ -52,6 +52,7 @@ public class MonthlyFinalReportFragment extends Fragment {
     ListView usersList;
     Button sendMailBtn;
     Uri u;
+    int chosenMonth;
     boolean todelete = false;
     private OnFragmentInteractionListener mListener;
 
@@ -92,6 +93,7 @@ public class MonthlyFinalReportFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         users = getArguments().getStringArrayList("usersForReport");
+        chosenMonth = Integer.parseInt(getArguments().getStringArrayList("chosenMonth").get(0));
         View v =  inflater.inflate(R.layout.fragment_monthly_final_report, container, false);
         usersList =(ListView)v.findViewById(R.id.finalListOfUsersforReport);
         sendMailBtn = (Button)v.findViewById(R.id.sendMonthlyReportMailBtn);
@@ -122,7 +124,7 @@ public class MonthlyFinalReportFragment extends Fragment {
             e.printStackTrace();
         }
     }
-    public void getList(Date chosenDate,ArrayList<String> users)
+    public void getList(int chosenMonth,ArrayList<String> users)
     {
 
       clearCsv();
@@ -152,9 +154,9 @@ public class MonthlyFinalReportFragment extends Fragment {
                                     Date dateExit = (Date) po.getDate("leavingTime");
 
 
-                                    if (dateEnter.getMonth() < chosenDate.getMonth())
+                                    if (dateEnter.getMonth() < chosenMonth)
                                         continue;
-                                    if (dateEnter.getMonth() > chosenDate.getMonth())
+                                    if (dateEnter.getMonth() > chosenMonth)
                                         break;
 
                                     action = (String) po.getString("progressDescription");
@@ -238,7 +240,7 @@ public class MonthlyFinalReportFragment extends Fragment {
        //final Uri u =  csvSave("a","b","c","d" ,"e");
        // todelete = true;
         Date chosenDate = new Date();
-        getList(chosenDate, users);
+        getList(chosenMonth, users);
         sendMailBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

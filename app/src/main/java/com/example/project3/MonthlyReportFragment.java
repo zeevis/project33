@@ -5,18 +5,22 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.parse.FindCallback;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +46,7 @@ public class MonthlyReportFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
     Button getReportBtn;
     ListView usersList;
+    DatePicker dp;
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -80,6 +85,31 @@ public class MonthlyReportFragment extends Fragment {
         View v =  inflater.inflate(R.layout.fragment_monthly_report, container, false);
         usersList = (ListView)v.findViewById(R.id.workersNameForMRListV);
         getReportBtn = (Button)v.findViewById(R.id.GetReportBtn);
+        Toast.makeText(getActivity(),ParseUser.getCurrentUser().getUsername(),Toast.LENGTH_LONG).show();
+        dp = (DatePicker)v.findViewById(R.id.datePicker);
+
+
+        try {
+            Field f[] = dp.getClass().getDeclaredFields();
+            for (Field field : f) {
+                if (field.getName().equals("mDaySpinner")||field.getName().equals("mYearSpinner")) {
+                    field.setAccessible(true);
+                    Object yearPicker = new Object();
+                    yearPicker = field.get(dp);
+                    ((View) yearPicker).setVisibility(View.GONE);
+                }
+            }
+        }
+        catch (SecurityException e) {
+            Log.d("ERROR", e.getMessage());
+        }
+        catch (IllegalArgumentException e) {
+            Log.d("ERROR", e.getMessage());
+        }
+        catch (IllegalAccessException e) {
+            Log.d("ERROR", e.getMessage());
+        }
+
 
         return v;
     }
@@ -88,8 +118,11 @@ public class MonthlyReportFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getListOfUsers();
+
       //  usersList.seto
     }
+
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -97,8 +130,6 @@ public class MonthlyReportFragment extends Fragment {
             mListener.onFragmentInteraction(uri);
         }
     }
-
-
 
     public void getListOfUsers()
     {
@@ -127,6 +158,7 @@ public class MonthlyReportFragment extends Fragment {
                         @Override
                         public void onClick(View v) {
 
+
                             SparseBooleanArray sp = usersList.getCheckedItemPositions();
                             ArrayList<String> finalUsersToPublish = new ArrayList<String>();
                             String str = "";
@@ -136,6 +168,9 @@ public class MonthlyReportFragment extends Fragment {
 
                             Bundle bundle = new Bundle();
                             bundle.putStringArrayList("usersForReport", finalUsersToPublish);
+                            bundle.putStringArrayList("chosenMonth", new ArrayList<String>() {{
+                                add("" + dp.getMonth());
+                            }});
 
 
 
@@ -144,6 +179,7 @@ public class MonthlyReportFragment extends Fragment {
                             FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                             fragmentManager.beginTransaction()
                                     .replace(R.id.container, mfrf)
+                                    .addToBackStack(null)
                                     .commit();
 
 

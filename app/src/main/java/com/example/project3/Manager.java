@@ -24,7 +24,9 @@ import java.util.ArrayList;
 
 public class Manager extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks ,WorkerFragment.OnFragmentInteractionListener
-        , AddOrEditUserFragment.OnFragmentInteractionListener,MonthlyReportFragment.OnFragmentInteractionListener,MonthlyFinalReportFragment.OnFragmentInteractionListener {
+        , AddOrEditUserFragment.OnFragmentInteractionListener,MonthlyReportFragment.OnFragmentInteractionListener
+        ,MonthlyFinalReportFragment.OnFragmentInteractionListener
+        ,SettingsManagerFragment.OnFragmentInteractionListener,AllTasksFragment.OnFragmentInteractionListener {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -36,6 +38,8 @@ public class Manager extends ActionBarActivity
      */
     private CharSequence mTitle;
     String userid;
+    String password;
+    String username;
     boolean saveOrUpdate;
 
     int test = -100;
@@ -43,6 +47,11 @@ public class Manager extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manager);
+
+
+
+
+
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -55,8 +64,16 @@ public class Manager extends ActionBarActivity
 
         Intent intent = getIntent();
         userid= intent.getExtras().getString("userid");
+        password = intent.getExtras().getString("password");
+        username = ParseUser.getCurrentUser().getUsername();
     }
 
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        //myFragment.onBackPressed();
+    }
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
@@ -67,6 +84,7 @@ public class Manager extends ActionBarActivity
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, wf)
+                    .addToBackStack(null)
                     .commit();
         }
        else if (position == 1) {
@@ -74,18 +92,42 @@ public class Manager extends ActionBarActivity
 
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
-                    .replace(R.id.container,  mrf )
+                    .replace(R.id.container, mrf)
+                    .addToBackStack(null)
                     .commit();
         }
-        else if (position == 2)
+        else if (position == 2) {
+            AllTasksFragment atf = new AllTasksFragment();
+
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, atf)
+                    .addToBackStack(null)
+                    .commit();
+        }
+        else if (position == 3) {
+            SettingsManagerFragment smf = new SettingsManagerFragment();
+
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, smf)
+            .addToBackStack(null)
+                    .commit();
+        }
+
+        else if (position == 5)
         {
             ParseUser.logOut();
             ParseUser currentUser = ParseUser.getCurrentUser(); // this will now be null
+            Intent intent = new Intent(this,LoginPage.class);
+            startActivity(intent);
+
         }
         else {
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                    .addToBackStack(null)
                     .commit();
         }
 

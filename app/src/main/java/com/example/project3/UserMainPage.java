@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,7 +31,9 @@ import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
@@ -45,8 +48,10 @@ import java.util.List;
  * Created by maayan on 04/07/2015.
  */
 public class UserMainPage extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks , UserInfoFragment.OnFragmentInteractionListener, UserActionFragment.OnFragmentInteractionListener {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks , UserInfoFragment.OnFragmentInteractionListener
+        , UserActionFragment.OnFragmentInteractionListener,ActionDailyChosenForUser.OnFragmentInteractionListener {
     static String userid;
+
     boolean enterExitBtnWorks;
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -64,6 +69,11 @@ public class UserMainPage extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.useractivity);
 
+
+
+
+
+
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
@@ -74,8 +84,8 @@ public class UserMainPage extends ActionBarActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
         Intent intent = getIntent();
         userid= intent.getExtras().getString("userid");
-    }
 
+    }
 
 
 
@@ -94,6 +104,7 @@ public class UserMainPage extends ActionBarActivity
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 fragmentManager.beginTransaction()
                         .replace(R.id.container, uif)
+                        .addToBackStack(null)
                         .commit();
         }
         else if (position == 1) {
@@ -102,15 +113,31 @@ public class UserMainPage extends ActionBarActivity
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, uaf)
+                    .addToBackStack(null)
                     .commit();
+        }
+        else if (position == 3)
+        {
+            ParseUser.logOut();
+            ParseUser currentUser = ParseUser.getCurrentUser(); // this will now be null
+            Intent intent = new Intent(this,LoginPage.class);
+            startActivity(intent);
+
         }
         else {
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                    .addToBackStack(null)
                     .commit();
         }
 
+    }
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        //myFragment.onBackPressed();
     }
     public void onSectionAttached(int number) {
         switch (number) {
@@ -204,6 +231,7 @@ public class UserMainPage extends ActionBarActivity
         }
 
         public PlaceholderFragment() {
+
         }
 
 
@@ -215,6 +243,31 @@ public class UserMainPage extends ActionBarActivity
             enterExitBtn = (Button)rootView.findViewById(R.id.enterExitBtn);
             timeAndDateUserTv = (TextView)rootView.findViewById(R.id.timeAndDateUserTv);
             lv = (ListView)rootView.findViewById(R.id.listView);
+
+            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+
+                    String dateToCompareStr = parent.getItemAtPosition(position).toString().substring(0,10).trim();
+
+
+                    Bundle args = new Bundle();
+                    args.putString("dateToCompareStr",dateToCompareStr);
+
+                                ActionDailyChosenForUser adcfu = new ActionDailyChosenForUser();
+                                adcfu.setArguments(args);
+                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                fragmentManager.beginTransaction()
+                                        .replace(R.id.container, adcfu)
+                                        .addToBackStack(null)
+                                        .commit();
+
+
+
+                }
+            });
+
 
 
             new StrDataFromParse(this,this, parentActivity.userid).execute();
@@ -256,23 +309,17 @@ public class UserMainPage extends ActionBarActivity
                 @Override
                 public void onClick(View v) {
 
-/*
-                    if(inOrOut) {
-                        SharedPreferences prefs = getActivity().getSharedPreferences("prefs", MODE_PRIVATE);
-                        String str = prefs.getString("ifInside", "0");
-                        ((Button)v).setText("Exit");
-                        timeAndDateUserTv.setText(str);
-                    }*/
 
-                    if(((Button)v).getText().equals("Enter")) {
+                    if (((Button) v).getText().equals("Enter")) {
                         Date date = new Date();
-                        uploadListDateToParse(date, "arrivalTime",true,"",0);
+                        uploadListDateToParse(date, "arrivalTime", true, "", 0);
                         DateFormat timeFormatter = new SimpleDateFormat("HH:mm");
                         String timeDateFormatted = timeFormatter.format(date.getTime());
-                       // DateFormat dateFormatter = new SimpleDateFormat("MM/dd/YYYY");
-                        String dateFormatted = date.toString().substring(0, 10);;
+                        // DateFormat dateFormatter = new SimpleDateFormat("MM/dd/YYYY");
+                        String dateFormatted = date.toString().substring(0, 10);
+                        ;
 
-                        timeDataForTodayStr= dateFormatted +"    "+timeDateFormatted;
+                        timeDataForTodayStr = dateFormatted + "    " + timeDateFormatted;
                         timeAndDateUserTv.setText(timeDataForTodayStr);
                         enterExitBtn.setText("Exit");
 
@@ -282,35 +329,55 @@ public class UserMainPage extends ActionBarActivity
                         editor.putBoolean("inOrOut", true);
                         editor.commit();
                         inOrOut = true;
+                        pushNotif(ParseUser.getCurrentUser().getUsername() +" has entered");
                         return;
 
 
                     }
-                  if(((Button)v).getText().equals("Exit")) {
-                      Date date = new Date();
-                    //////  uploadListDateToParse(date, "leavingTime",false,"",0);
-                      createDidTodayDialog( date);
-                      DateFormat timeFormatter = new SimpleDateFormat("HH:mm");
-                      String timeDateFormat = timeFormatter.format(date.getTime());
-                      String finalTimeAndDate = timeAndDateUserTv.getText() + " - "+timeDateFormat;
-                      dateAndTimeList.add(finalTimeAndDate);
+                    if (((Button) v).getText().equals("Exit")) {
+                        Date date = new Date();
+                        //////  uploadListDateToParse(date, "leavingTime",false,"",0);
+                        createDidTodayDialog(date);
+                        DateFormat timeFormatter = new SimpleDateFormat("HH:mm");
+                        String timeDateFormat = timeFormatter.format(date.getTime());
+                        String finalTimeAndDate = timeAndDateUserTv.getText() + " - " + timeDateFormat;
+                        dateAndTimeList.add(finalTimeAndDate);
 
-                      adapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1,dateAndTimeList);
-                      lv.setAdapter(adapter);
-                      timeAndDateUserTv.setText("");
-                      //timeAndDateUserTv.setText(timeAndDateUserTv.getText() + " - "+timeDateFormat);
-                      enterExitBtn.setText("Enter");
+                        adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, dateAndTimeList);
+                        lv.setAdapter(adapter);
+                        timeAndDateUserTv.setText("");
+                        //timeAndDateUserTv.setText(timeAndDateUserTv.getText() + " - "+timeDateFormat);
+                        enterExitBtn.setText("Enter");
 
-                      SharedPreferences.Editor editor = getActivity().getSharedPreferences("prefs", MODE_PRIVATE).edit();
-                      editor.putBoolean("inOrOut", false);
-                      editor.commit();
-                      inOrOut = false;
+                        SharedPreferences.Editor editor = getActivity().getSharedPreferences("prefs", MODE_PRIVATE).edit();
+                        editor.putBoolean("inOrOut", false);
+                        editor.commit();
+                        inOrOut = false;
+                        pushNotif(ParseUser.getCurrentUser().getUsername() +" has left");
 
                     }
                 }
             });
 
         }
+
+
+        public void pushNotif(String message)
+        {
+            // Create our Installation query
+            ParseQuery pushQuery = ParseInstallation.getQuery();
+            pushQuery.whereEqualTo("channels", "managers");
+
+// Send push notification to query
+            ParsePush push = new ParsePush();
+            push.setQuery(pushQuery); // Set our Installation query
+            push.setMessage(message);
+            push.sendInBackground();
+
+
+
+        }
+
 
         public void createDidTodayDialog(final Date date1)
         {

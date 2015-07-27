@@ -166,7 +166,7 @@ public class UserActionFragment extends Fragment {
                                                 // Now let's update it with some new data. In this case, only cheatMode and score
                                                 // will get sent to the Parse Cloud. playerName hasn't changed.
 
-                                                taskList.add("finishedTasks", Arrays.asList(strFromListToList));
+                                                taskList.add("finishedTasks", strFromListToList);
                                                 taskList.removeAll("tasks", Arrays.asList(strFromListToList));
                                                 taskList.saveInBackground();
                                             }
