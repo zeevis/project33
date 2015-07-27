@@ -10,15 +10,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
+import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -40,10 +47,13 @@ public class AddOrEditUserFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
-    EditText usernameEt,passwordEt,actionEt,emailEdit,latEt,lngEt;
+    EditText usernameEt,passwordEt,emailEdit,latEt,lngEt;
+    AutoCompleteTextView actionAC;
     Button saveBtn;
     ScrollView sv;
     boolean saveOrUpdate;
+    String username;
+    ArrayList<String> taskList;
    Manager parentActivity;
     /**
      * Use this factory method to create a new instance of
@@ -84,14 +94,15 @@ public class AddOrEditUserFragment extends Fragment {
         final View v =  inflater.inflate(R.layout.fragment_add_or_edit_user, container, false);
         usernameEt = (EditText)v.findViewById(R.id.usernameEditEt);
         passwordEt = (EditText)v.findViewById(R.id.passwordEditEt);
-        actionEt = (EditText)v.findViewById(R.id.actionEditEt);
+        actionAC = (AutoCompleteTextView)v.findViewById(R.id.actionEditAutoCompleteTextView);
         emailEdit = (EditText)v.findViewById(R.id.emailEditEt);
         latEt = (EditText)v.findViewById(R.id.geoPointLatEt);
         lngEt = (EditText)v.findViewById(R.id.geoPointLngEt);
         saveBtn = (Button)v.findViewById(R.id.saveUserDetailsbutton);
+        taskList = new ArrayList<String>();
 
 
-
+        getListOfTasksForAutoComplete();
         return v;
     }
 
@@ -99,16 +110,12 @@ public class AddOrEditUserFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
 
 
-
-
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if(!((Manager)getActivity()).saveOrUpdate)
-                {
-                    if(!isValidEmail(emailEdit.getText().toString()))
-                    {
+                if (!((Manager) getActivity()).saveOrUpdate) {
+                    if (!isValidEmail(emailEdit.getText().toString())) {
                         Toast.makeText(getActivity(), "email is invalid", Toast.LENGTH_LONG).show();
                         return;
                     }
@@ -120,7 +127,7 @@ public class AddOrEditUserFragment extends Fragment {
                     user.setEmail(emailEdit.getText().toString());
 
                     // other fields can be set just like with ParseObject
-                   // user.put("isManager", true);
+                    // user.put("isManager", true);
 
                     user.signUpInBackground(new SignUpCallback() {
 
@@ -128,24 +135,26 @@ public class AddOrEditUserFragment extends Fragment {
                         public void done(com.parse.ParseException e) {
                             if (e == null) {
                                 Log.i("wowwowowow", "sucsess"); // Hooray! Let them use the app now.
-                                float lat = latEt.getText().toString().equals("") ?0: Float.parseFloat(latEt.getText().toString());
-                                float lng = lngEt.getText().toString().equals("") ?0:Float.parseFloat(lngEt.getText().toString());
-                                SharedPreferences.Editor editor =getActivity().getSharedPreferences("prefs", Context.MODE_PRIVATE).edit();
-                                editor.putString("action" + user.getObjectId(), actionEt.getText().toString());
+                                float lat = latEt.getText().toString().equals("") ? 0 : Float.parseFloat(latEt.getText().toString());
+                                float lng = lngEt.getText().toString().equals("") ? 0 : Float.parseFloat(lngEt.getText().toString());
+                                SharedPreferences.Editor editor = getActivity().getSharedPreferences("prefs", Context.MODE_PRIVATE).edit();
+                                editor.putString("action" + user.getObjectId(), actionAC.getText().toString());
                                 editor.putFloat("lat" + user.getObjectId(), lat);
                                 editor.putFloat("lng" + user.getObjectId(), lng);
                                 editor.commit();
 
+                                logoutLogin();
+
                                 final ParseObject actions = new ParseObject("TasksList");
 /////////////////////////////////////////////////////////////////////
                                 actions.put("worker", ParseObject.createWithoutData(ParseUser.class, user.getObjectId()));
-                                actions.add("tasks", actionEt.getText().toString());
+                                actions.add("tasks", actionAC.getText().toString());
                                 actions.put("workPlace", new ParseGeoPoint(lat, lng));
                                 actions.saveInBackground();
-                                Toast.makeText(getActivity(),"saved",Toast.LENGTH_LONG).show();
+                                Toast.makeText(getActivity(), "saved", Toast.LENGTH_LONG).show();
                             } else {
                                 Log.i("!!!!!!!!!!!!!!!111", "no good " + e.toString());
-                                // Sign up didn't succeed. Look at the ParseException
+                                // Sign up didn't succeed. Look at the c
                                 // to figure out what went wrong
                             }
                         }
@@ -166,6 +175,36 @@ public class AddOrEditUserFragment extends Fragment {
 
     }
 
+    public void getListOfTasksForAutoComplete()
+    {
+        try {
+            ParseQuery<ParseObject> query = new ParseQuery<ParseObject>(
+                    "StaticTasks");
+            query.orderByAscending("taskName");//.whereEqualTo("worker", ParseUser.getCurrentUser());
+            List<ParseObject> ob = query.find();
+
+            for (ParseObject po : ob) {
+                String task =  po.getString("taskName");
+                taskList.add(task);
+            }
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+                    android.R.layout.simple_dropdown_item_1line, taskList);
+
+            actionAC.setAdapter(adapter);
+        }catch (ParseException e){
+
+        }
+    }
+
+    public void logoutLogin()
+    {
+        ParseUser.logOut();
+       ParseUser currentUser = ParseUser.getCurrentUser(); // this will now be null
+
+        ParseUser.logInInBackground(((Manager)getActivity()).username, ((Manager)getActivity()).password);
+
+    }
     public boolean isValidEmail(CharSequence target) {
         if (target == null) {
             {

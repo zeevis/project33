@@ -96,6 +96,8 @@ public class LoginPage extends ActionBarActivity {
                                 if (parseUser.getBoolean("isManager")) {
                                     Intent intent = new Intent(LoginPage.this, Manager.class);
                                     intent.putExtra("userid", parseUser.getObjectId());
+                                    intent.putExtra("password",password.getText().toString() );
+
                                     setResult(RESULT_OK, intent);
                                     startActivity(intent);
                                 } else {

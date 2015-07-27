@@ -13,6 +13,9 @@ public class OpenParse {
         Parse.enableLocalDatastore(c);
         Parse.initialize(c, "StL1Iz9EgoOGQYPr5Rs1ywDxcWOMQqYzH6hIhsNE", "SngtCgnX3ookYYufo11FL3WSS0JtOwlE51BeWgf7");
 
+       /* ParseInstallation pi = ParseInstallation.getCurrentInstallation();
+        pi.saveInBackground();
+        Log.i("dddddddddd", "passed here");*/
 
     }
 
