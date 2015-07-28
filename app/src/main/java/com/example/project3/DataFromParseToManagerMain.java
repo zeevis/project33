@@ -6,9 +6,11 @@ import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
+import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -27,6 +29,11 @@ public class DataFromParseToManagerMain extends AsyncTask<Void, Void,Integer> {
     static ArrayList< Date> arriveDates = new ArrayList<Date>();
     static ArrayList<Date> exitDates = new ArrayList<Date>();
     static ArrayList<String> names = new ArrayList<String>();
+
+    static ArrayList<String>  onlyArrived = new ArrayList<>();
+
+
+
     String userid;
     int counter = 0;
     Date currentDate;
@@ -52,6 +59,45 @@ public class DataFromParseToManagerMain extends AsyncTask<Void, Void,Integer> {
             Integer numOfPages = 0;
             try {
             // Locate the class table named "Country" in Parse.com
+
+                ParseQuery<ParseUser> uquery = ParseUser.getQuery();
+                final ArrayList<String> users = new ArrayList<String>();
+                uquery.findInBackground(new FindCallback<ParseUser>() {
+                    @Override
+                    public void done(List<ParseUser> objects, com.parse.ParseException e) {
+                        if (e == null) {
+
+                            for(ParseUser pu:objects)
+                            {
+                                if(pu.getBoolean("isInShift"))
+                                {
+                                   Date dateArrive= pu.getDate("arrivedAt");
+                                    DateFormat timeFormatter = new SimpleDateFormat("HH:mm");
+
+                                    if(dateArrive!=null) {
+                                        String arrive = timeFormatter.format(dateArrive.getTime());
+                                        String date = dateArrive.toString().substring(0, 10);
+                                        String name = pu.getUsername();
+                                        String finalStr = name +":  "+  date + "  " + arrive;
+                                        onlyArrived.add(finalStr);
+                                    }
+
+
+
+                                }
+                            }
+                            ((Manager.PlaceholderFragment)fragment).loadListDateFromParse(onlyArrived, ((Manager.PlaceholderFragment) fragment).onlyEnterLv, (Manager.PlaceholderFragment) fragment);
+
+                        } else {
+
+                        }
+                    }});
+
+
+
+
+
+
             ParseQuery<ParseObject> query = new ParseQuery<ParseObject>(
                     "Shift");
                 query.include("worker");
@@ -151,15 +197,18 @@ public class DataFromParseToManagerMain extends AsyncTask<Void, Void,Integer> {
 
 
             String finalTimeAndDate =name +":  "+  date + "  " + arrive  + " - " + exit;
+            enterAndExitList.add(finalTimeAndDate);
+
+           /*
 
             if(exit.equals(""))
                 onlyEnterList.add(finalTimeAndDate);
             else
-                enterAndExitList.add(finalTimeAndDate);
+                enterAndExitList.add(finalTimeAndDate);*/
         }
 
         //.whereEqualTo("worker", ParseUser.getCurrentUser());
-        ((Manager.PlaceholderFragment)fragment).loadListDateFromParse(onlyEnterList, ((Manager.PlaceholderFragment) fragment).onlyEnterLv, (Manager.PlaceholderFragment) fragment);
+      //  ((Manager.PlaceholderFragment)fragment).loadListDateFromParse(onlyEnterList, ((Manager.PlaceholderFragment) fragment).onlyEnterLv, (Manager.PlaceholderFragment) fragment);
         ((Manager.PlaceholderFragment)fragment).loadListDateFromParse(enterAndExitList, ((Manager.PlaceholderFragment) fragment).enterAndExitLv, (Manager.PlaceholderFragment) fragment);
 
 

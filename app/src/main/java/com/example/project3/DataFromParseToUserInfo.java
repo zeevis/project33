@@ -110,14 +110,14 @@ public class DataFromParseToUserInfo extends AsyncTask<Void, Void,Integer> {
 
 
             String finalTimeAndDate = date + "  " + arrive  + " - " + exit;
-            dateAndTimeList.add(finalTimeAndDate);
+            ((UserInfoFragment)fragment).dateAndTimeList.add(finalTimeAndDate);
         }
-        if(dateAndTimeList != null)
+     /*  if(dateAndTimeList != null)
             ((UserInfoFragment)fragment).dateAndTimeList = dateAndTimeList;
         else
-            ((UserInfoFragment)fragment).dateAndTimeList = new ArrayList<String>();
+            ((UserInfoFragment)fragment).dateAndTimeList = new ArrayList<String>();*/
 
-        ((UserInfoFragment)fragment).loadListDateFromParse(dateAndTimeList, ((UserInfoFragment) fragment).allInfoLv, (UserInfoFragment) fragment);
+        ((UserInfoFragment)fragment).loadListDateFromParse(((UserInfoFragment)fragment).dateAndTimeList, ((UserInfoFragment) fragment).allInfoLv, (UserInfoFragment) fragment);
 
 
 

@@ -182,14 +182,20 @@ public class AddOrEditUserFragment extends Fragment {
                     "StaticTasks");
             query.orderByAscending("taskName");//.whereEqualTo("worker", ParseUser.getCurrentUser());
             List<ParseObject> ob = query.find();
-
+            String task="";
             for (ParseObject po : ob) {
-                String task =  po.getString("taskName");
+                task =  po.getString("taskName")+",";
                 taskList.add(task);
             }
 
+
+
+            String[] arr = taskList.toArray(new String[taskList.size()]);
+
+
+
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_dropdown_item_1line, taskList);
+                    android.R.layout.simple_dropdown_item_1line,  arr);
 
             actionAC.setAdapter(adapter);
         }catch (ParseException e){

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -28,7 +29,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.parse.FindCallback;
-import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseInstallation;
@@ -235,6 +235,26 @@ public class UserMainPage extends ActionBarActivity
         }
 
 
+        @Override
+        public void onResume() {
+            super.onResume();
+
+            LocationManager lm = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
+
+            lm.requestLocationUpdates(lm.GPS_PROVIDER,0,0,this);
+
+
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+
+            LocationManager lm = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
+
+            lm.removeUpdates(this);
+
+        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -243,6 +263,7 @@ public class UserMainPage extends ActionBarActivity
             enterExitBtn = (Button)rootView.findViewById(R.id.enterExitBtn);
             timeAndDateUserTv = (TextView)rootView.findViewById(R.id.timeAndDateUserTv);
             lv = (ListView)rootView.findViewById(R.id.listView);
+            dateAndTimeList = new ArrayList<String>();
 
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -267,6 +288,9 @@ public class UserMainPage extends ActionBarActivity
 
                 }
             });
+
+
+
 
 
 
@@ -312,12 +336,12 @@ public class UserMainPage extends ActionBarActivity
 
                     if (((Button) v).getText().equals("Enter")) {
                         Date date = new Date();
-                        uploadListDateToParse(date, "arrivalTime", true, "", 0);
+                         uploadListDateToParse(date, "arrivedAt", true, "", 0);
                         DateFormat timeFormatter = new SimpleDateFormat("HH:mm");
                         String timeDateFormatted = timeFormatter.format(date.getTime());
                         // DateFormat dateFormatter = new SimpleDateFormat("MM/dd/YYYY");
                         String dateFormatted = date.toString().substring(0, 10);
-                        ;
+
 
                         timeDataForTodayStr = dateFormatted + "    " + timeDateFormatted;
                         timeAndDateUserTv.setText(timeDataForTodayStr);
@@ -459,8 +483,14 @@ public class UserMainPage extends ActionBarActivity
         {
             // array = new ArrayList<String>();
 
+
+           //ArrayAdapter<String> adapterEmpty = new ArrayAdapter<String>(fragment.getActivity(),android.R.layout.simple_list_item_1,new ArrayList<String>());
+            //lv.setAdapter(adapterEmpty);
+
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(fragment.getActivity(),android.R.layout.simple_list_item_1,array);
             lv.setAdapter(adapter);
+
+
 
 
 
@@ -476,18 +506,23 @@ public class UserMainPage extends ActionBarActivity
         {
             String g= "";
             if(trueEnterFalseExit) {
-                final ParseObject dates = new ParseObject("Shift");
-                dates.put("worker", ParseObject.createWithoutData(ParseUser.class, parentActivity.userid));
+                final ParseUser dates = ParseUser.getCurrentUser();
+                try {
+                    dates.fetch();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                // dates.put("worker", ParseObject.createWithoutData(ParseUser.class, parentActivity.userid));
                 dates.put(column, date);
+                dates.put("isInShift",true);
                 dates.saveInBackground(new SaveCallback() {
                     @Override
-                  public void done(com.parse.ParseException e) {
+                    public void done(com.parse.ParseException e) {
                         //  Access the object id here
                         objectIdToRefresh = dates.getObjectId();
                         SharedPreferences.Editor editor = getActivity().getSharedPreferences("prefs", MODE_PRIVATE).edit();
                         editor.putString("objectIdToRefresh", objectIdToRefresh);
                         editor.commit();
-
 
 
                     }
@@ -496,6 +531,58 @@ public class UserMainPage extends ActionBarActivity
             else{
                 SharedPreferences prefs = getActivity().getSharedPreferences("prefs", MODE_PRIVATE);
                 objectIdToRefresh = prefs.getString("objectIdToRefresh", "0");
+
+                final ParseUser pu =  ParseUser.getCurrentUser();
+                try {
+                    pu.fetch();
+
+
+
+                Date dateArrived =(Date) pu.get("arrivedAt");
+
+               final ParseObject dates = new ParseObject("Shift");
+                // dates.put("worker", ParseObject.createWithoutData(ParseUser.class, parentActivity.userid));
+                dates.put(column, date);
+                dates.put("arrivalTime",dateArrived);
+                dates.put("transportationPayments", transport);
+                dates.put("progressDescription", didToday);
+                dates.put("worker", ParseObject.createWithoutData(ParseUser.class, parentActivity.userid));
+                dates.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(com.parse.ParseException e) {
+                        //  Access the object id here
+
+
+                        objectIdToRefresh = dates.getObjectId();
+                        SharedPreferences.Editor editor = getActivity().getSharedPreferences("prefs", MODE_PRIVATE).edit();
+                        editor.putString("objectIdToRefresh", objectIdToRefresh);
+                        editor.commit();
+
+
+                        pu.put("isInShift", false);
+                        //pu.put("arrivedAt", );
+                        pu.saveEventually(new SaveCallback() {
+                            @Override
+                            public void done(ParseException e) {
+                                if (e == null) {
+
+                                } else
+                                    Log.i("!!!!!!!!!!!!!!!!!!!!!", e.toString());
+                            }
+                        });
+
+                    }
+                });
+
+
+
+
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+
+/*
                 ParseQuery<ParseObject> query = ParseQuery.getQuery("Shift");
 
 // Retrieve the object by id
@@ -506,12 +593,13 @@ public class UserMainPage extends ActionBarActivity
                             // Now let's update it with some new data. In this case, only cheatMode and score
                             // will get sent to the Parse Cloud. playerName hasn't changed.
                             dates.put(column, date);
+
                             dates.put("transportationPayments",transport );
                             dates.put("progressDescription", didToday);
                             dates.saveInBackground();
                         }
                     }
-                });
+                });*/
             }
         }
 
@@ -533,6 +621,7 @@ public class UserMainPage extends ActionBarActivity
 
         @Override
         public void onLocationChanged(Location location) {
+            Log.i("ggggggggggggg",location.toString());
 
             final double lat = location.getLatitude();
             final double longitude = location.getLongitude();
@@ -541,11 +630,12 @@ public class UserMainPage extends ActionBarActivity
             final Location location1 = location;
 
 
-            ParseQuery<ParseUser> query = ParseUser.getQuery();
-            query.whereEqualTo("objectId", userid);
-            query.findInBackground(new FindCallback<ParseUser>() {
+            ParseQuery<ParseObject> query =new ParseQuery<ParseObject>("TasksList");
+
+            query.whereEqualTo("worker", ParseUser.getCurrentUser());
+            query.findInBackground(new FindCallback<ParseObject>() {
                 @Override
-                public void done(List<ParseUser> objects, ParseException e) {
+                public void done(List<ParseObject> objects, ParseException e) {
                     if (e == null) {
                         // The query was successful.
                         ParseGeoPoint workGeoPoint = objects.get(0).getParseGeoPoint("workPlace");
@@ -558,6 +648,8 @@ public class UserMainPage extends ActionBarActivity
                             enterExitBtn.setEnabled(true);
                         }
                     } else {
+
+                        Log.i("ggggggggggggg",e.getMessage().toString());
                         // Something went wrong.
                     }
                 }

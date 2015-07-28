@@ -26,7 +26,7 @@ public class LoginPage extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        //Change OpenParse to Application
         OpenParse.getOpenPares(this);
 
         ParseUser currentUser = ParseUser.getCurrentUser();
@@ -100,11 +100,13 @@ public class LoginPage extends ActionBarActivity {
 
                                     setResult(RESULT_OK, intent);
                                     startActivity(intent);
+                                    finish();
                                 } else {
                                     Intent intent = new Intent(LoginPage.this, UserMainPage.class);
                                     intent.putExtra("userid", parseUser.getObjectId());
                                     setResult(RESULT_OK, intent);
                                     startActivity(intent);
+                                    finish();
                                 }
 
 

@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -262,7 +263,7 @@ public class Manager extends ActionBarActivity
 
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(fragment.getActivity(),android.R.layout.simple_list_item_1,array);
             lv.setAdapter(adapter);
-
+            Log.i("ddddddddddddddddddddd",array.toString());
 
 
             return array;

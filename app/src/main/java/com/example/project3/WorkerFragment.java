@@ -47,7 +47,7 @@ public class WorkerFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
+   String username1;
     ListView usersList;
     private OnFragmentInteractionListener mListener;
 
@@ -122,6 +122,7 @@ public class WorkerFragment extends Fragment {
                         if (e == null) {
                             // The query was successful.
                             final String userid =objects.get(0).getObjectId();
+                             username1 =objects.get(0).getUsername();
 
 
                             ParseUser user = objects.get(0);
@@ -272,7 +273,7 @@ public class WorkerFragment extends Fragment {
         // set dialog message
         alertDialogBuilder
                 .setCancelable(false)
-                .setTitle("Edit " + userid)
+                .setTitle("Edit user: " + username1)
                 .setPositiveButton("Save",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {

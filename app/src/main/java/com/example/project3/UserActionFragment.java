@@ -125,7 +125,7 @@ public class UserActionFragment extends Fragment {
 
 
         // set dialog message
-        alertDialogBuilder.setTitle("have you finished the task?")
+        alertDialogBuilder.setTitle("")
                 .setCancelable(false)
                 .setPositiveButton("Save",
                         new DialogInterface.OnClickListener() {
@@ -139,6 +139,9 @@ public class UserActionFragment extends Fragment {
 
 
                                 ParseQuery<ParseObject> query = ParseQuery.getQuery("TasksList");
+
+
+
 
                                 query.whereEqualTo("worker", ParseUser.getCurrentUser());
                                 String oid = "";

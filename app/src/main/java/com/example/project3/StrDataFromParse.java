@@ -22,8 +22,8 @@ public class StrDataFromParse extends AsyncTask<Void, Void,Integer> {
     Activity activity;
     Fragment fragment;
 
-    static ArrayList< Date> arriveDates = new ArrayList<Date>();
-    static ArrayList<Date> exitDates = new ArrayList<Date>();
+    ArrayList< Date> arriveDates = new ArrayList<Date>();
+    ArrayList<Date> exitDates = new ArrayList<Date>();
     String userid;
     int counter = 0;
     Date currentDate;
@@ -96,7 +96,7 @@ public class StrDataFromParse extends AsyncTask<Void, Void,Integer> {
     protected void onPostExecute(Integer result) {
         //ProphilePage.listOfSales = sales;
        // ((ProphilePage) contextOfProphilePage).salesFromListToTextView(sales);
-        ArrayList<String> dateAndTimeList = new ArrayList<String>();
+        ((UserMainPage.PlaceholderFragment)fragment).dateAndTimeList = new ArrayList<String>();
         if(arriveDates == null)
             ((UserMainPage.PlaceholderFragment)fragment).datesNTimesEnter = new ArrayList<Date>();
         else
@@ -125,14 +125,14 @@ public class StrDataFromParse extends AsyncTask<Void, Void,Integer> {
 
 
             String finalTimeAndDate = date + "  " + arrive  + " - " + exit;
-            dateAndTimeList.add(finalTimeAndDate);
+            ((UserMainPage.PlaceholderFragment)fragment).dateAndTimeList.add(finalTimeAndDate);
         }
-        if(dateAndTimeList != null)
+      /*  if(dateAndTimeList != null)
            ((UserMainPage.PlaceholderFragment)fragment).dateAndTimeList = dateAndTimeList;
         else
-            ((UserMainPage.PlaceholderFragment)fragment).dateAndTimeList = new ArrayList<String>();
+            ((UserMainPage.PlaceholderFragment)fragment).dateAndTimeList = new ArrayList<String>();*/
 
-        ((UserMainPage.PlaceholderFragment)fragment).loadListDateFromParse(dateAndTimeList, ((UserMainPage.PlaceholderFragment) fragment).lv, (UserMainPage.PlaceholderFragment) fragment);
+        ((UserMainPage.PlaceholderFragment)fragment).loadListDateFromParse(((UserMainPage.PlaceholderFragment)fragment).dateAndTimeList, ((UserMainPage.PlaceholderFragment) fragment).lv, (UserMainPage.PlaceholderFragment) fragment);
 
 
 

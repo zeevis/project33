@@ -22,9 +22,14 @@
         android:text="transportation payment"
         android:id="@+id/transPayment"
         android:layout_gravity="center_horizontal" />
+
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editTextWhatTransportation"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editTextWhatTransportation" />
+
+
 </LinearLayout>
